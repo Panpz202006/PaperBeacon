@@ -1,0 +1,34 @@
+{
+  "name": "MedQKFormer \u2014 Spike-Attention Prior Art Monitor",
+  "abstract_file": "../examples/medqkformer_abstract.txt",
+  "since": 2026,
+  "venues": [
+    "CVPR",
+    "ICCV",
+    "ECCV",
+    "NeurIPS",
+    "ICLR",
+    "ICML",
+    "AAAI",
+    "IJCAI",
+    "IEEE TMI",
+    "Medical Image Analysis"
+  ],
+  "include_arxiv": true,
+  "sources": [
+    "openalex",
+    "semantic_scholar",
+    "dblp",
+    "arxiv"
+  ],
+  "per_source_per_query": 15,
+  "max_queries": 3,
+  "queries": [
+    "spiking transformer medical segmentation attention",
+    "complementary spike query key attention",
+    "inactive neurons spiking segmentation"
+  ],
+  "max_papers": 35,
+  "venue_aliases": {},
+  "openalex_semantic": false
+}

@@ -1,0 +1,5 @@
+We investigate spiking transformer attention for medical image segmentation, focusing on
+complementary low-response and active spike interactions. The research evaluates whether
+activated-inactivated query-key decomposition improves spatial representations compared
+with standard spiking self-attention, and whether simpler adaptive gates yield better
+segmentation accuracy, boundary robustness, and measured inference efficiency.

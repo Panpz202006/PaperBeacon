@@ -1,0 +1,13 @@
+{
+  "timezone": "Asia/Shanghai",
+  "send_time": "07:30",
+  "llm_model": "gpt-6-astra",
+  "topics": [
+    "survival_continual.json",
+    "gan_continual.json",
+    "peft_agentic.json"
+  ],
+  "retrieval_policy": "available",
+  "openalex_anonymous_fallback": true,
+  "ranking_method": "keyword"
+}

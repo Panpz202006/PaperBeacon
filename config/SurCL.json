@@ -1,0 +1,35 @@
+{
+  "name": "Survival Analysis + Continual Learning + Anomaly Detection Literature Monitor",
+  "topic": "survival analysis time-to-event prediction censoring continual learning lifelong learning catastrophic forgetting anomaly detection outlier detection concept drift",
+  "since": 2026,
+  "venues": [
+    "CVPR",
+    "ICCV",
+    "ECCV",
+    "NeurIPS",
+    "ICLR",
+    "ICML",
+    "AAAI",
+    "IJCAI",
+    "TNNLS",
+    "TPAMI"
+  ],
+  "include_arxiv": true,
+  "sources": [
+    "openalex",
+    "semantic_scholar",
+    "dblp",
+    "arxiv"
+  ],
+  "per_source_per_query": 15,
+  "max_queries": 4,
+  "queries": [
+    "survival analysis continual learning anomaly detection",
+    "survival analysis continual learning",
+    "continual learning anomaly detection",
+    "survival analysis anomaly detection"
+  ],
+  "max_papers": 35,
+  "venue_aliases": {},
+  "openalex_semantic": false
+}

@@ -1,0 +1,10 @@
+{
+  "DISCLAIMER": "SYNTHETIC DEMO RECORDS, NOT REAL PUBLICATIONS. Never cite as scholarly evidence.",
+  "papers": [
+    {"title": "Synthetic Complementary Spike Attention for Segmentation (DEMO)", "year": 2026, "abstract": "A synthetic study on spike attention, complement gates and medical segmentation.", "venue_raw": "International Conference on Learning Representations", "authors": ["Synthetic Author"], "url": "https://example.org/synthetic-a", "doi": "10.0000/synthetic-a", "sources": ["fixture"]},
+    {"title": "Synthetic Complementary Spike Attention for Segmentation (DEMO)", "year": 2026, "abstract": "Synthetic abstract duplicate.", "venue_raw": "ICLR", "doi": "https://doi.org/10.0000/synthetic-a", "sources": ["fixture"]},
+    {"title": "Synthetic Inactive Neuron Segmentation (DEMO)", "year": 2025, "abstract": "A fictional arXiv preprint on inactive neuron representations.", "venue_raw": "arXiv", "arxiv_id": "9999.99999", "url": "https://example.org/synthetic-b", "sources": ["fixture"]},
+    {"title": "Synthetic Workshop Paper (FILTERED DEMO)", "year": 2026, "abstract": "A fake workshop article.", "venue_raw": "CVPR Workshops", "url": "https://example.org/synthetic-c", "sources": ["fixture"]},
+    {"title": "Synthetic Unrelated Journal (FILTERED DEMO)", "year": 2025, "abstract": "Not relevant and not a permitted venue.", "venue_raw": "Unlisted Journal", "url": "https://example.org/synthetic-d", "sources": ["fixture"]}
+  ]
+}

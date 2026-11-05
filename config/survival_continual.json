@@ -1,0 +1,54 @@
+{
+  "name": "Anomaly detection with survival analysis and continual learning",
+  "topic": "Anomaly detection with survival analysis and continual learning",
+  "venues": [
+    "CVPR",
+    "ICCV",
+    "ECCV",
+    "NeurIPS",
+    "ICLR",
+    "ICML",
+    "AAAI",
+    "IJCAI",
+    "KDD",
+    "IEEE TPAMI",
+    "JMLR"
+  ],
+  "include_arxiv": true,
+  "queries": [
+    "anomaly detection survival analysis",
+    "continual anomaly detection concept drift",
+    "neural survival time series early warning",
+    "hazard estimation uncertainty calibration",
+    "visual anomaly detection continual learning"
+  ],
+  "max_queries": 8,
+  "per_source_per_query": 30,
+  "max_papers": 60,
+  "timezone": "Asia/Shanghai",
+  "send_time": "07:30",
+  "llm_model": "gpt-6-astra",
+  "venue_aliases": {
+    "KDD": [
+      "Proceedings of the ACM SIGKDD Conference on Knowledge Discovery and Data Mining"
+    ],
+    "IEEE TPAMI": [
+      "IEEE Transactions on Pattern Analysis and Machine Intelligence"
+    ],
+    "JMLR": [
+      "Journal of Machine Learning Research"
+    ]
+  },
+  "ranking_method": "keyword",
+  "ranking_keywords": [
+    "anomaly detection",
+    "survival analysis",
+    "hazard",
+    "time-to-event",
+    "censoring",
+    "continual learning",
+    "concept drift",
+    "forgetting",
+    "early warning"
+  ]
+}

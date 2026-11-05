@@ -1,0 +1,55 @@
+{
+  "name": "Parameter efficient and agentic anomaly detection",
+  "topic": "Parameter efficient and agentic anomaly detection",
+  "venues": [
+    "CVPR",
+    "ICCV",
+    "ECCV",
+    "NeurIPS",
+    "ICLR",
+    "ICML",
+    "AAAI",
+    "IJCAI",
+    "KDD",
+    "IEEE TPAMI",
+    "JMLR"
+  ],
+  "include_arxiv": true,
+  "queries": [
+    "LoRA adapters continual anomaly detection",
+    "LLM time series anomaly explanation",
+    "tool using agents anomaly investigation",
+    "multimodal visual anomaly detection foundation models",
+    "parameter efficient continual learning representation stability"
+  ],
+  "max_queries": 8,
+  "per_source_per_query": 30,
+  "max_papers": 60,
+  "timezone": "Asia/Shanghai",
+  "send_time": "07:30",
+  "llm_model": "gpt-6-astra",
+  "venue_aliases": {
+    "KDD": [
+      "Proceedings of the ACM SIGKDD Conference on Knowledge Discovery and Data Mining"
+    ],
+    "IEEE TPAMI": [
+      "IEEE Transactions on Pattern Analysis and Machine Intelligence"
+    ],
+    "JMLR": [
+      "Journal of Machine Learning Research"
+    ]
+  },
+  "ranking_method": "keyword",
+  "ranking_keywords": [
+    "anomaly detection",
+    "LoRA",
+    "adapter",
+    "parameter-efficient",
+    "fine-tuning",
+    "LLM",
+    "agent",
+    "multimodal",
+    "continual adaptation",
+    "foundation models"
+  ]
+}

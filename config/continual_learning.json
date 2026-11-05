@@ -1,0 +1,26 @@
+{
+  "name": "Continual Learning Literature Monitor",
+  "topic": "parameter efficient continual learning representation retention interference control structured knowledge",
+  "since": 2025,
+  "venues": [
+    "NeurIPS",
+    "ICLR",
+    "ICML",
+    "AAAI",
+    "IJCAI",
+    "CVPR"
+  ],
+  "include_arxiv": true,
+  "sources": [
+    "openalex",
+    "semantic_scholar",
+    "dblp",
+    "arxiv"
+  ],
+  "per_source_per_query": 20,
+  "max_queries": 3,
+  "queries": [],
+  "max_papers": 40,
+  "venue_aliases": {},
+  "openalex_semantic": false
+}

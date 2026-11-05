@@ -1,0 +1,26 @@
+{
+  "name": "Generative modeling for continual anomaly detection",
+  "topic": "Generative modeling for continual anomaly detection",
+  "bridges": [
+    "GAN anomaly detection",
+    "generative replay continual learning",
+    "synthetic anomaly complementary sample generation",
+    "one class open set anomaly detection",
+    "generative models concept drift time series"
+  ],
+  "foundations": [
+    "generative adversarial networks density estimation",
+    "likelihood ratio anomaly detection",
+    "continual learning generative replay"
+  ],
+  "modalities": [
+    "computer vision",
+    "multivariate time series"
+  ],
+  "recent_days": 365,
+  "foundation_since": 1900,
+  "max_queries": 8,
+  "max_analysis_papers": 30,
+  "max_ideas": 4,
+  "contact": ""
+}

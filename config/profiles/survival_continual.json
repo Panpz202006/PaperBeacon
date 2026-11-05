@@ -1,0 +1,26 @@
+{
+  "name": "Anomaly detection with survival analysis and continual learning",
+  "topic": "Anomaly detection with survival analysis and continual learning",
+  "bridges": [
+    "anomaly detection survival analysis",
+    "continual anomaly detection concept drift",
+    "neural survival time series early warning",
+    "hazard estimation uncertainty calibration",
+    "visual anomaly detection continual learning"
+  ],
+  "foundations": [
+    "survival analysis hazard censoring",
+    "sequential change point detection",
+    "continual learning catastrophic forgetting"
+  ],
+  "modalities": [
+    "computer vision",
+    "multivariate time series"
+  ],
+  "recent_days": 365,
+  "foundation_since": 1900,
+  "max_queries": 8,
+  "max_analysis_papers": 30,
+  "max_ideas": 4,
+  "contact": ""
+}

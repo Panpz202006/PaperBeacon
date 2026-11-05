@@ -1,0 +1,30 @@
+# Local credentials and private configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Virtual environments
+.venv/
+venv/
+prcg/
+
+# Generated reports, delivery history, provider caches and logs
+runs/
+*.log
+
+# Python build and test artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local editor and operating-system files
+.vscode/
+.idea/
+.DS_Store

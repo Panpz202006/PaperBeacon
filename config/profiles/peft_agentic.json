@@ -1,0 +1,26 @@
+{
+  "name": "Parameter efficient and agentic anomaly detection",
+  "topic": "Parameter efficient and agentic anomaly detection",
+  "bridges": [
+    "LoRA adapters continual anomaly detection",
+    "LLM time series anomaly explanation",
+    "tool using agents anomaly investigation",
+    "multimodal visual anomaly detection foundation models",
+    "parameter efficient continual learning representation stability"
+  ],
+  "foundations": [
+    "parameter efficient fine tuning low rank adaptation",
+    "Bayesian uncertainty anomaly detection",
+    "statistical hypothesis testing sequential anomaly detection"
+  ],
+  "modalities": [
+    "computer vision",
+    "multivariate time series"
+  ],
+  "recent_days": 365,
+  "foundation_since": 1900,
+  "max_queries": 8,
+  "max_analysis_papers": 30,
+  "max_ideas": 4,
+  "contact": ""
+}
