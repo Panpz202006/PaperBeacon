@@ -2,13 +2,13 @@
 
 **Your daily signal from research.**
 
-PaperBeacon discovers papers for three research directions, saves the results locally, and sends one concise email each morning. Lightweight keyword ranking runs entirely on your laptop; no OpenAI API key or model download is needed for daily monitoring.
+PaperBeacon is a configurable academic paper discovery and monitoring agent. Define your research topics, search queries, and preferred publication venues; PaperBeacon retrieves relevant papers, saves them locally, and delivers a concise daily email digest.
 
-- **Survival & Continual Learning:** anomaly detection, survival analysis, hazard modeling and adaptation.
-- **GANs & Continual Learning:** generative models, replay and continual anomaly detection.
-- **Efficient Learning & AI Agents:** parameter-efficient learning, LLMs and agentic anomaly investigation.
+Lightweight keyword ranking runs entirely on your laptop, so daily monitoring requires no OpenAI API key or model download. Each paper entry includes its title, publication venue and date, available author affiliations, abstract, and download links. Persistent delivery tracking helps prevent duplicate reports and recover from interruptions.
 
-PaperBeacon retains its original Python package and command names, `literature_scout` and `literature-scout`, for compatibility.
+Use PaperBeacon for a single research question or multiple research directions. The included topic configurations are examples you can adapt to your own interests, within the coverage of the supported academic sources.
+
+The Python package and CLI retain their original names, `literature_scout` and `literature-scout`, for compatibility.
 
 ## Quick start
 
