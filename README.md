@@ -107,8 +107,8 @@ Moving the repository requires reinstalling the scheduler. Do not remove the act
 Create `runs/` and add the following with `crontab -e`, using your actual repository path:
 
 ```cron
-*/5 * * * * /bin/bash /path/to/PaperBeacon/scripts/scout.sh digest >> /path/to/PaperBeacon/runs/daily.log 2>&1
-@reboot /bin/bash /path/to/PaperBeacon/scripts/scout.sh digest >> /path/to/PaperBeacon/runs/daily.log 2>&1
+*/5 * * * * /bin/bash /path/to/PaperBeacon/scripts/daily_watch.sh >> /path/to/PaperBeacon/runs/daily.log 2>&1
+@reboot /bin/bash /path/to/PaperBeacon/scripts/daily_watch.sh >> /path/to/PaperBeacon/runs/daily.log 2>&1
 ```
 
 The application sends only when due and unsent, rather than on every check. Use one scheduler per laptop.
@@ -123,8 +123,8 @@ Reports and state live under `runs/daily-three-topics/` and are excluded from Gi
 <topic>/candidates-START-END.json         Retrieved records before ranking
 <topic>/candidates-START-END.txt          Readable candidates
 <topic>/coverage-START-END.json           Retrieval diagnostics
-collected/YYYY-MM-DD/<topic>-DATE-*      Per-topic shortlists and reports
-collected/YYYY-MM-DD/anomaly-research-*  Combined papers, report and email
+collected/YYYY-MM-DD/<topic>-daily-DATE-*      Per-topic shortlists and reports
+collected/YYYY-MM-DD/paperbeacon-daily-*  Combined papers, report and email
 provider-recovery/                      Shared source health and query cache
 digest-state.json                       Durable outbox and delivery history
 ```
@@ -143,7 +143,7 @@ bash scripts/scout.sh send-local --papers /path/to/papers.csv \
   --title 'Spiking Transformers & Complementary Attention'
 ```
 
-CSV and JSON inputs are supported, including multiple files after `--papers`. This sends up to five unreported records in file order, without retrieval or GPT. Saved records are labeled as such rather than as a new weekly search. Local-file delivery history is separate from scheduled digest history.
+CSV and JSON inputs are supported, including multiple files after `--papers`. This sends up to five unreported records in file order, without retrieval or GPT. Saved records are labeled as such rather than as a new daily discovery report. Local-file delivery history is separate from scheduled digest history.
 
 ## Optional research intelligence
 
@@ -175,3 +175,30 @@ Offline fixtures are synthetic and must not be cited as real publications. Other
 Initialize Git and connect your chosen GitHub repository when ready. Your Git commit email and GitHub account authentication are separate settings. This project does not configure either automatically.
 
 MIT License. See [LICENSE](LICENSE).
+
+## Historical recommendations on quiet days
+
+When the combined recent-paper selection is empty, `historical_fallback: true` in `config/daily_digest.json` enables a second pass through each topic's saved baseline and candidate files. PaperBeacon ranks relevant older papers locally and recommends up to five that have never been reported. It does not fill a partially populated recent digest with old papers.
+
+Historical recommendations are labeled **Historical picks** in the email, keep their original publication dates, and share normal delivery tracking and retry protection. After successful sending they are excluded from subsequent recommendations across all topics. Failed sends do not mark them delivered. When live retrieval fails but a matching local library exists, the digest can still recommend historical papers; it does not claim that no new papers exist.
+
+This is an abstract-level revisit of existing records, not automatic full-text reading or AI-generated scientific analysis. The source library is restricted to the matching topic state and excludes future/undated records whose age cannot be established. No extra OpenAI calls are made in keyword mode. Set `historical_fallback` to `false` to disable it.
+
+## Daily reporting and file naming
+
+PaperBeacon delivers **one report every day at 07:30 Asia/Shanghai**, not once a week. The rolling seven-day publication window is a discovery lookback to accommodate indexing delays; already delivered papers are excluded. If the current lookback yields no eligible recommendations, the daily report can revisit unreported historical papers.
+
+The scheduler uses `scripts/daily_watch.sh`. `scripts/weekly_watch.sh` remains only as a legacy single-topic compatibility entry point and is not scheduled by the combined workflow. Do not schedule both.
+
+New output names explicitly identify daily reports:
+
+```text
+collected/YYYY-MM-DD/<topic>-daily-YYYY-MM-DD-papers.json
+collected/YYYY-MM-DD/<topic>-daily-YYYY-MM-DD-report.txt
+collected/YYYY-MM-DD/paperbeacon-daily-YYYY-MM-DD-papers.json
+collected/YYYY-MM-DD/paperbeacon-daily-YYYY-MM-DD-report.txt
+collected/YYYY-MM-DD/paperbeacon-daily-YYYY-MM-DD-email.json
+paperbeacon-daily-YYYY-MM-DD.txt
+```
+
+Baseline files and `candidates-START-END` files retain date-window names because they describe retrieved literature rather than delivery frequency. Existing archives and `digest-state.json` are preserved; changing filenames does not reset successful delivery history or resend a report.

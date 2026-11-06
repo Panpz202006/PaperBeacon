@@ -14,7 +14,7 @@ path.parent.mkdir(parents=True, exist_ok=True)
 with path.open('wb') as stream:
     plistlib.dump({
         'Label': 'com.literature-scout.daily',
-        'ProgramArguments': ['/bin/bash', str(root / 'scripts/scout.sh'), 'digest'],
+        'ProgramArguments': ['/bin/bash', str(root / 'scripts/daily_watch.sh')],
         'WorkingDirectory': str(root),
         'RunAtLoad': True,
         'StartInterval': 300,

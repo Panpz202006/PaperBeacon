@@ -83,9 +83,9 @@ class DigestTests(unittest.TestCase):
         self.assertIn('no email sent', result)
         self.send.assert_not_called()
         archive = self.folder/'collected/2026-11-05'
-        self.assertTrue((archive/'survival_continual-2026-11-05-papers.json').exists())
-        self.assertTrue((archive/'anomaly-research-2026-11-05-report.txt').exists())
-        email = json.loads((archive/'anomaly-research-2026-11-05-email.json').read_text())
+        self.assertTrue((archive/'survival_continual-daily-2026-11-05-papers.json').exists())
+        self.assertTrue((archive/'paperbeacon-daily-2026-11-05-report.txt').exists())
+        email = json.loads((archive/'paperbeacon-daily-2026-11-05-email.json').read_text())
         self.assertIn('Survival, GANs & Agentic AI', email['subject'])
         self.assertIn('2026-11-05 | 5 papers', email['subject'])
         self.prepare.reset_mock()

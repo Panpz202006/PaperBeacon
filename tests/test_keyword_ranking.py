@@ -49,7 +49,7 @@ class KeywordRankingTests(unittest.TestCase):
             self.assertEqual(pending['ranking_method'], 'keyword')
             self.assertNotIn('Matched terms:', pending['body'])
             self.assertNotIn('Ranking:', pending['body'])
-            self.assertLessEqual(len(json.loads((folder/'collected/2026-11-05/anomaly-research-2026-11-05-papers.json').read_text())), 5)
+            self.assertLessEqual(len(json.loads((folder/'collected/2026-11-05/paperbeacon-daily-2026-11-05-papers.json').read_text())), 5)
             sender = Mock()
             send_saved_digest(folder, sender=sender, now=now)
             sender.assert_called_once()

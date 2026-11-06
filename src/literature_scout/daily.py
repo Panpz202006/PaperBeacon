@@ -172,15 +172,15 @@ def run_daily(config: dict, research_text: str, folder: Path, *, now: datetime |
                     state['baseline_coverage_warnings'] = result.warnings
                     save_json(path, state)
                 # Search the week separately: yearly result caps must not hide recent papers.
-                week_start = today - timedelta(days=6)
-                weekly = scanner({**config, 'since': week_start.year,
-                                  '_date_start': week_start.isoformat(), '_date_end': today.isoformat()},
+                window_start = today - timedelta(days=6)
+                recent_scan = scanner({**config, 'since': window_start.year,
+                                  '_date_start': window_start.isoformat(), '_date_end': today.isoformat()},
                                  research_text)
-                check_retrieval(weekly, config)
-                coverage.extend(weekly.warnings)
-                papers = weekly.papers
+                check_retrieval(recent_scan, config)
+                coverage.extend(recent_scan.warnings)
+                papers = recent_scan.papers
                 if not preview:
-                    save_json(folder / f'candidates-{week_start}-{today}.json', [p.to_dict() for p in papers])
+                    save_json(folder / f'candidates-{window_start}-{today}.json', [p.to_dict() for p in papers])
             eligible = [p for p in papers if in_window(p, today - timedelta(days=6), today)
                         and not identity_tokens(p).intersection(set(state['reported']) | set(excluded_tokens))]
             ranked = ranker(eligible, selection_text, config['llm_model'])[:5]
@@ -207,7 +207,7 @@ def run_daily(config: dict, research_text: str, folder: Path, *, now: datetime |
         state['deliveries'][pending['day']] = {'sent_at': now.isoformat(), 'message_id': pending['message_id']}
         del state['pending']
         save_json(path, state)
-        (folder / f'digest-{pending["day"]}.txt').write_text(pending['body'], encoding='utf-8')
+        (folder / f'paperbeacon-daily-{pending["day"]}.txt').write_text(pending['body'], encoding='utf-8')
         return f'Sent report for {pending["day"]}'
 
 

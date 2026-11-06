@@ -9,5 +9,6 @@
   ],
   "retrieval_policy": "available",
   "openalex_anonymous_fallback": true,
-  "ranking_method": "keyword"
+  "ranking_method": "keyword",
+  "historical_fallback": true
 }

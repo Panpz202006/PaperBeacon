@@ -12,6 +12,7 @@ from .dedup import deduplicate
 from .ranking import daily_ranker, ranking_text
 from .models import Paper
 from .monitor import identity_tokens
+from .history import historical_shortlists
 
 
 def finalize(folder, state, path):
@@ -28,7 +29,7 @@ def finalize(folder, state, path):
             save_json(child_path, child_state)
     state['reported'] = sorted(set(state['reported']) | set(pending['tokens']))
     state['deliveries'][pending['day']] = {'sent_at': pending['submitted_at'], 'message_id': pending['message_id']}
-    (folder / f'digest-{pending["day"]}.txt').write_text(pending['body'], encoding='utf-8')
+    (folder / f'paperbeacon-daily-{pending["day"]}.txt').write_text(pending['body'], encoding='utf-8')
     del state['pending']
     save_json(path, state)
 
@@ -79,18 +80,31 @@ def run_digest(manifest, folder, *, preview=False, now=None, prepare=run_daily,
                     prepared.append((slug, cfg, item))
                 except (OSError, ValueError, RuntimeError, KeyError) as exc:
                     unavailable.append(f'{cfg["name"]}: collection unavailable — {exc}')
-            if not prepared:
-                raise RuntimeError('No topic produced a ready ranked report; raw candidates may already be saved locally. ' + '; '.join(unavailable))
             candidates = deduplicate([Paper.from_dict(p) for _, _, item in prepared for p in item['papers']])
             candidates = [p for p in candidates if not identity_tokens(p) & set(state['reported'])]
             topic_text = '\n'.join(ranking_text(cfg, cfg['topic']) for _, cfg in configs)
             selected = ranker(candidates, topic_text, settings['llm_model'])[:5]
+            selection_mode = 'recent'
+            history_issues = []
+            if not selected and settings.get('historical_fallback', True):
+                historical, history_issues = historical_shortlists(configs, folder, now.date(), state['reported'], ranker)
+                historical_candidates = deduplicate([Paper.from_dict(p) for _, _, item in historical for p in item['papers']])
+                selected = ranker(historical_candidates, topic_text, settings['llm_model'])[:5]
+                if selected:
+                    historical_slugs = {slug for slug, _, _ in historical}
+                    prepared = historical + [entry for entry in prepared if entry[0] not in historical_slugs]
+                    selection_mode = 'historical'
+            if not prepared:
+                raise RuntimeError('No current evidence or unreported historical recommendations available. ' + '; '.join(unavailable + history_issues))
             subject = f'Anomaly Detection Research | Survival, GANs & Agentic AI | {today} | {len(selected)} papers'
-            lines = [topic_sections(configs, prepared, selected)]
+            lines = (["Historical picks — previously unreported papers from your saved library.", '']
+                     if selection_mode == 'historical' else [])
+            lines.append(topic_sections(configs, prepared, selected))
             pending = {'day': today, 'subject': subject, 'body': '\n'.join(lines),
                        'tokens': sorted(set().union(*(identity_tokens(p) for p in selected))),
                        'children': [slug for slug, _, _ in prepared],
-                       'coverage_warnings': unavailable,
+                       'coverage_warnings': unavailable + history_issues,
+                       'selection_mode': selection_mode,
                        'source_coverage': {slug: item.get('coverage_warnings', []) for slug, _, item in prepared},
                        'ranking_method': settings.get('ranking_method', 'keyword'),
                        'message_id': f'<scout.combined.{scope[:20]}.{today}@literature-scout.local>',
@@ -101,12 +115,12 @@ def run_digest(manifest, folder, *, preview=False, now=None, prepare=run_daily,
             archive = folder / 'collected' / today
             archive.mkdir(parents=True, exist_ok=True)
             for slug, cfg, item in prepared:
-                save_json(archive / f'{slug}-{today}-papers.json', item['papers'])
-                (archive / f'{slug}-{today}-report.txt').write_text(item['body'] if 'body' in item
+                save_json(archive / f'{slug}-daily-{today}-papers.json', item['papers'])
+                (archive / f'{slug}-daily-{today}-report.txt').write_text(item['body'] if 'body' in item
                     else plain_report(cfg['name'], [Paper.from_dict(p) for p in item['papers']]), encoding='utf-8')
-            save_json(archive / f'anomaly-research-{today}-papers.json', [p.to_dict() for p in selected])
-            (archive / f'anomaly-research-{today}-report.txt').write_text(pending['body'], encoding='utf-8')
-            save_json(archive / f'anomaly-research-{today}-email.json', pending)
+            save_json(archive / f'paperbeacon-daily-{today}-papers.json', [p.to_dict() for p in selected])
+            (archive / f'paperbeacon-daily-{today}-report.txt').write_text(pending['body'], encoding='utf-8')
+            save_json(archive / f'paperbeacon-daily-{today}-email.json', pending)
             pending['archive'] = str(archive)
             state['pending'] = pending
             save_json(path, state)

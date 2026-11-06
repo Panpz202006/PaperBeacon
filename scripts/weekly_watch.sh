@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Compatibility entry point; now checks the daily 07:30 digest.
+# Legacy single-topic daily entry point; retained for compatibility only.
+# For the combined daily report, use scripts/daily_watch.sh.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 ENV_FILE="${SCOUT_ENV_FILE:-$PWD/.env}"

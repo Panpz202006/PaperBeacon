@@ -4,7 +4,7 @@ PaperBeacon keeps the `literature_scout` module and original command names for c
 
 ## Daily workflow
 
-`interface.py` exposes the repository commands through `scripts/scout.sh`. `digest.py` coordinates per-topic collection and a single durable email. `daily.py` manages yearly baselines, weekly windows and paper cards. `ranking.py` supplies local keyword relevance; `dedup.py` links DOI, arXiv and normalized-title identities.
+`scripts/daily_watch.sh` is the combined daily scheduler entry point. `interface.py` exposes the repository commands through `scripts/scout.sh`. `digest.py` coordinates per-topic collection and a single durable email. `daily.py` manages yearly baselines, rolling seven-day discovery windows for daily delivery and paper cards. `ranking.py` supplies local keyword relevance; `dedup.py` links DOI, arXiv and normalized-title identities.
 
 `pipeline.py` orchestrates OpenAlex, Semantic Scholar, DBLP and arXiv adapters. `http_client.py` handles HTTP errors and pacing; `source_recovery.py` persists provider circuits and exact-query caches. `models.py` stores bibliographic provenance and paper-specific author affiliations. `local_email.py` supports independent delivery of existing records.
 
