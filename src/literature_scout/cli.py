@@ -19,6 +19,7 @@ def build_parser() -> argparse.ArgumentParser:
     for action in ('scan','watch'):
         cmd = sub.add_parser(action, help='One-off discovery' if action == 'scan' else 'Discover newly observed records')
         cmd.add_argument('--config', required=True, help='JSON configuration')
+        cmd.add_argument('--since', type=int, help='Override earliest publication year')
         mode = cmd.add_mutually_exclusive_group()
         mode.add_argument('--topic', help='Override config topic with a phrase')
         mode.add_argument('--abstract-file', help='Use abstract from plain-text file')
@@ -59,6 +60,10 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         cfg = load_config(args.config)
+        if getattr(args, 'since', None) is not None:
+            if not 1900 <= args.since <= 9999:
+                raise ValueError('since must be a four-digit year')
+            cfg['since'] = args.since
         if args.command == 'validate-config':
             print('OK:', args.config)
             print('Sources:', ', '.join(cfg['sources']))

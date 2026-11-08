@@ -1,0 +1,11 @@
+{
+  "name": "Research area conference search",
+  "since": 2024,
+  "venues": ["NeurIPS", "ICML", "ICLR", "AAAI", "ACM MM", "CVPR", "IJCAI"],
+  "include_arxiv": false,
+  "sources": ["openalex", "semantic_scholar", "dblp"],
+  "per_source_per_query": 50,
+  "max_queries": 3,
+  "max_papers": 100,
+  "queries": []
+}

@@ -13,6 +13,18 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description='Literature Scout laptop interface',
         epilog='Run from the repository using: bash scripts/scout.sh COMMAND')
     sub = parser.add_subparsers(dest='command', required=True)
+    search = sub.add_parser('search', help='Search a research area within the seven selected conferences')
+    query = search.add_mutually_exclusive_group(required=True)
+    query.add_argument('--topic', help='Keywords or a short research description')
+    query.add_argument('--abstract-file', help='Read the research description from a UTF-8 file')
+    search.add_argument('--since', type=int, default=2024, help='Earliest publication year (default: 2024)')
+    search.add_argument('--until', type=int, help='Last publication year, inclusive (default: current year)')
+    search.add_argument('--email-to', help='Email the full exploration report and attachments to this address')
+    search.add_argument('--top', type=int, help='Keep only the top N papers by keyword relevance')
+    search.add_argument('--venues', nargs='+',
+                        help='Comma- or space-separated venues: NeurIPS/NIPS, ICML, ICLR, AAAI, ACM MM, CVPR, IJCAI (default: all seven)')
+    search.add_argument('--out', default='runs/area-search')
+    search.add_argument('--offline-fixture', help='Use local fixture records instead of APIs')
     research = sub.add_parser('research', help='Generate research reports; no email or experiments')
     research.add_argument('topic', choices=['all', *TOPICS], nargs='?', default='all')
     research.add_argument('--out', default='runs/research', help='Parent directory for per-topic reports/history')
@@ -41,6 +53,27 @@ def main(argv=None):
         cmd.add_argument('--out', default=os.getenv('SCOUT_OUTPUT', 'runs/daily-medqkformer'))
     sub.add_parser('schedule', help='Generate a macOS scheduler file; does not install or activate it')
     args = parser.parse_args(argv)
+    if args.command == 'search':
+        from datetime import datetime
+        from zoneinfo import ZoneInfo
+        from .exploration import explore
+        try:
+            text = args.topic if args.topic is not None else Path(args.abstract_file).read_text(encoding='utf-8')
+            result = explore(text, args.out, since=args.since,
+                             until=args.until if args.until is not None else datetime.now(ZoneInfo('Asia/Shanghai')).year,
+                             fixture=args.offline_fixture, email_to=args.email_to, venues=args.venues, top=args.top)
+            print(f'Saved {len(result.papers)} matching papers: {result.config["report_file"]}')
+            for venue, summary in result.counts['venue_coverage'].items():
+                print(f'{venue}: {summary["retrieved_records"]} retrieved; {summary["selected_records"]} selected; '
+                      f'{len(summary["failed_years"])} failed year(s)')
+            for warning in result.warnings:
+                print('WARNING: ' + warning, file=sys.stderr)
+            if args.email_to:
+                print('Exploration report and attachments accepted by SMTP server')
+            return 0
+        except (OSError, ValueError, RuntimeError, KeyError) as exc:
+            print(f'ERROR: {exc}', file=sys.stderr)
+            return 1
     if args.command in ('collect', 'send'):
         try:
             if args.command == 'collect':

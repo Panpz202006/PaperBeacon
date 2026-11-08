@@ -203,6 +203,48 @@ paperbeacon-daily-YYYY-MM-DD.txt
 
 Baseline files and `candidates-START-END` files retain date-window names because they describe retrieved literature rather than delivery frequency. Existing archives and `digest-state.json` are preserved; changing filenames does not reset successful delivery history or resend a report.
 
+## Search a research area in selected conferences
+
+Search with keywords or a short description:
+
+```bash
+bash scripts/scout.sh search --topic "continual learning for anomaly detection" --since 2024
+bash scripts/scout.sh search --topic "Detect anomalies as data distributions change, while retaining knowledge of earlier tasks." --out runs/my-area
+bash scripts/scout.sh search --abstract-file examples/medqkformer_abstract.txt --since 2025
+```
+
+The preset searches **NeurIPS (including the former NIPS name), ICML, ICLR, AAAI, ACM MM, CVPR, and IJCAI**. This is the requested venue list, rather than an exhaustive CCF ranking catalog. It excludes arXiv-only records, workshops, and other venues using indexed venue metadata. No OpenAI key or email setup is required.
+
+Use an inclusive publication-year range to explore the indexed proceedings:
+
+Add `--venues ICML` to search ICML only, or `--venues ICML NeurIPS ICLR` for a subset. The default remains all seven venues.
+Comma-separated lists also work: `--venues ICML,NeurIPS,ICLR`. Quote lists containing spaces, for example `--venues "ICML, ACM MM, ICLR"`. `NIPS` is accepted as an alias for `NeurIPS`.
+
+Add `--top 100` to retain the top 100 keyword-ranked matches. Ranking uses title/available-abstract keyword overlap, with publication recency contributing to the score. This is lexical screening, not a semantic review. Without `--top`, all matches are retained; `venue-corpus.json` always preserves the full eligible corpus.
+
+```bash
+bash scripts/scout.sh search --topic "continual anomaly detection" --since 2023 --until 2025 --out runs/anomaly-2023-2025
+bash scripts/scout.sh search --topic "continual anomaly detection" --since 2023 --until 2025 --out runs/anomaly-email --email-to researcher@example.org
+```
+
+The search enumerates DBLP records for each selected venue and year using pagination, then retains every record with research keyword overlap in its title or available abstract. There is no top-five or top-100 cutoff. `--since` defaults to 2024; `--until` defaults to the current year in Asia/Shanghai. These are publication years, not acceptance dates.
+
+If DBLP fails or returns no records, independent fallbacks cover all seven venues: ICML uses PMLR, NeurIPS its proceedings site, ICLR its official conference paper listing, CVPR the CVF Open Access repository, and IJCAI its proceedings site. AAAI uses Crossref records for its proceedings ISSN; ACM MM uses ACM-deposited Crossref records, filtered by the exact main-proceedings container title to exclude companion and workshop volumes. The Crossref routes exhaust cursor pagination and provide publisher metadata rather than independently verified acceptance lists. HTML fallbacks screen titles; Crossref also uses abstracts when deposited.
+
+NeurIPS follows the main-conference volume when the year landing page opens a different track, includes the conference, datasets/benchmarks, and position papers listed in that volume, and checks its declared paper count when available. Other proceedings sources include their published conference tracks; matching remains lexical and does not establish that a paper jointly addresses every topic in the description.
+
+`coverage.json` records the source, retrieved count, and failure for every requested venue/year. An unavailable year does not stop independent years or venues. A failed DBLP API is not repeatedly queried during that run. Access denial or rate limiting defers further requests to the affected fallback source; other sources continue. If retrieval fails, an empty report explicitly says the search is incomplete and cannot establish whether matching papers exist. Unpublished or unavailable proceedings are recorded as failures, not zero-paper successes.
+
+Results are saved under `runs/area-search` as `report.md`, `report.txt`, `papers.json`, `papers.bib`, and `manifest.json`. `venue-corpus.json` preserves all eligible indexed records for further review, including those without keyword overlap. The command prints retrieved/selected counts and failed-year counts per venue. `--top 100` selects 100 across the combined corpus; it does not allocate 100 to each venue. Use a separate `--out` directory to preserve each search.
+
+**Coverage limit:** complete index pagination is not proof of complete official accepted-paper coverage. DBLP indexing can lag, venue metadata can be incomplete, and DBLP usually lacks abstracts. Local lexical matching can miss related papers. Check official proceedings before treating results as all accepted papers; warnings remain in the command output and metadata, while the paper list keeps only name, year, and venue.
+
+The final plain-text report is also preserved as `report-YYYYMMDD-HHMMSS-microseconds.txt`, using completion time in Asia/Shanghai. The command prints this timestamped path, and `manifest.json` records it as `config.report_file`. `report.txt` remains a copy of the latest report; other exports are replaced when the same output directory is reused.
+
+Exploration reports list only paper name, publication year, and venue, separated by tabs. Detailed metadata and retrieval diagnostics remain in `papers.json`, `manifest.json`, and `coverage.json`. Empty results include a status message so a failed search cannot be mistaken for confirmed absence of papers.
+
+Local files are always written first. With `--email-to`, the configured SMTP account sends the full report with the timestamped report, `papers.json`, and `coverage.json` attached to that recipient. Configure `SCOUT_SMTP_HOST`, `SCOUT_EMAIL_FROM`, and any required SMTP credentials/security settings as for daily delivery. Sending is explicit on every invocation; repeating an email command sends another email. If SMTP fails, the saved files remain available. No email is sent unless `--email-to` is provided.
+
 ## Replace today’s zero-paper report
 
 If a zero-paper email was already sent before historical recommendations became available, prepare a guarded replacement:

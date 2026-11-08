@@ -1,5 +1,6 @@
 """Conservative venue validation from bibliographic METADATA, not paper claims."""
 from __future__ import annotations
+import re
 from .models import normalize_text, Paper
 
 # Extend here or add config.ven ue_aliases in a configuration file.
@@ -12,6 +13,9 @@ ALIASES = {
                'Neural Information Processing Systems'],
     'ICLR': ['ICLR', 'International Conference on Learning Representations'],
     'ICML': ['ICML', 'International Conference on Machine Learning'],
+    'ACM MM': ['ACM MM', 'ACM Multimedia', 'ACM International Conference on Multimedia',
+               'Proceedings of the ACM International Conference on Multimedia',
+               'Proceedings of the ACM Multimedia Conference', 'MM'],
     'AAAI': ['AAAI', 'AAAI Conference on Artificial Intelligence', 'Proceedings of the AAAI Conference on Artificial Intelligence'],
     'IJCAI': ['IJCAI', 'International Joint Conference on Artificial Intelligence'],
     'MICCAI': ['MICCAI', 'Medical Image Computing and Computer Assisted Intervention',
@@ -26,12 +30,15 @@ ALIASES = {
 }
 
 # Selective *known* proceedings variants; custom venues require exact alias match.
-PROCEEDINGS_NAMES = {'CVPR', 'ICCV', 'ECCV', 'NeurIPS', 'ICLR', 'ICML', 'AAAI', 'IJCAI', 'MICCAI', 'BIBM'}
+PROCEEDINGS_NAMES = {'CVPR', 'ICCV', 'ECCV', 'NeurIPS', 'ICLR', 'ICML', 'AAAI', 'IJCAI', 'ACM MM', 'MICCAI', 'BIBM'}
 WORKSHOP_TERMS = {'workshop', 'workshops', 'companion', 'poster abstracts'}
 
 
 def match_venue(raw: str, desired: list[str], custom_aliases: dict[str, list[str]] | None = None) -> str:
     val = normalize_text(raw)
+    # ACM proceedings commonly include the edition number in their title.
+    val = re.sub(r'^proceedings of the \d+(?:st|nd|rd|th) acm ',
+                 'proceedings of the acm ', val)
     if not val or val in {'arxiv', 'arxiv preprint', 'repository'}:
         return ''
     alias_map = dict(ALIASES)

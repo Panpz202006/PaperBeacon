@@ -83,11 +83,11 @@ def plain_report(title: str, papers: list[Paper], *, note: str = '') -> str:
 
 
 def send_email(message: dict) -> None:
-    required = ('SCOUT_SMTP_HOST', 'SCOUT_EMAIL_FROM', 'SCOUT_EMAIL_TO')
+    required = ('SCOUT_SMTP_HOST', 'SCOUT_EMAIL_FROM')
     missing = [key for key in required if not os.getenv(key)]
     if missing:
         raise ValueError('Missing email settings: ' + ', '.join(missing))
-    recipients = [x.strip() for x in os.environ['SCOUT_EMAIL_TO'].split(',') if x.strip()]
+    recipients = [x.strip() for x in message.get('to', os.getenv('SCOUT_EMAIL_TO', '')).split(',') if x.strip()]
     if not recipients:
         raise ValueError('SCOUT_EMAIL_TO needs at least one address')
     msg = EmailMessage()
@@ -98,6 +98,9 @@ def send_email(message: dict) -> None:
     msg['Message-ID'] = message['message_id']
     msg['Date'] = message['date_header']
     msg.set_content(message['body'])
+    for attachment in message.get('attachments', []):
+        file = Path(attachment)
+        msg.add_attachment(file.read_bytes(), maintype='application', subtype='octet-stream', filename=file.name)
     mode = os.getenv('SCOUT_SMTP_SECURITY', 'starttls')
     if mode not in ('ssl', 'starttls'):
         raise ValueError('SCOUT_SMTP_SECURITY must be ssl or starttls')
