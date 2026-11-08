@@ -28,6 +28,9 @@ def finalize(folder, state, path):
             child_state.pop('pending', None)
             save_json(child_path, child_state)
     state['reported'] = sorted(set(state['reported']) | set(pending['tokens']))
+    if pending.get('replaces_empty_report') and pending['day'] in state['deliveries']:
+        state.setdefault('superseded_empty_deliveries', []).append(
+            {'day': pending['day'], **state['deliveries'][pending['day']]})
     state['deliveries'][pending['day']] = {'sent_at': pending['submitted_at'], 'message_id': pending['message_id']}
     (folder / f'paperbeacon-daily-{pending["day"]}.txt').write_text(pending['body'], encoding='utf-8')
     del state['pending']
@@ -35,7 +38,7 @@ def finalize(folder, state, path):
 
 
 def run_digest(manifest, folder, *, preview=False, now=None, prepare=run_daily,
-               ranker=None, sender=send_email, stage='both'):
+               ranker=None, sender=send_email, stage='both', retry_empty=False):
     if stage not in ('both', 'collect'):
         raise ValueError('stage must be both or collect')
     manifest = Path(manifest).resolve()
@@ -66,14 +69,17 @@ def run_digest(manifest, folder, *, preview=False, now=None, prepare=run_daily,
             raise ValueError('Combined research scope changed; choose a new digest output directory')
         if state.get('pending', {}).get('submitted_at') and not preview:
             finalize(folder, state, path)  # Complete local bookkeeping without resending.
-        if today in state['deliveries'] and not preview:
+        replacing = bool(state.get('pending', {}).get('replaces_empty_report'))
+        if retry_empty and today in state['deliveries'] and not replacing:
+            confirm_empty_report(folder, today)
+        if today in state['deliveries'] and not preview and not retry_empty and not replacing:
             return 'Already sent today'
         if not state.get('pending') or preview:
             prepared = []
             unavailable = []
             for slug, cfg in configs:
                 try:
-                    item = prepare(cfg, cfg['topic'], folder / slug, now=now, preview=preview,
+                    item = prepare(cfg, cfg['topic'], folder / slug, now=now, preview=(preview or retry_empty),
                                    prepare_only=True, excluded_tokens=state['reported'])
                     if not isinstance(item, dict):
                         raise RuntimeError(f'no prepared report: {item}')
@@ -96,6 +102,8 @@ def run_digest(manifest, folder, *, preview=False, now=None, prepare=run_daily,
                     selection_mode = 'historical'
             if not prepared:
                 raise RuntimeError('No current evidence or unreported historical recommendations available. ' + '; '.join(unavailable + history_issues))
+            if retry_empty and not selected:
+                raise RuntimeError('No unreported papers available; no replacement email prepared')
             subject = f'Anomaly Detection Research | Survival, GANs & Agentic AI | {today} | {len(selected)} papers'
             lines = (["Historical picks — previously unreported papers from your saved library.", '']
                      if selection_mode == 'historical' else [])
@@ -105,6 +113,7 @@ def run_digest(manifest, folder, *, preview=False, now=None, prepare=run_daily,
                        'children': [slug for slug, _, _ in prepared],
                        'coverage_warnings': unavailable + history_issues,
                        'selection_mode': selection_mode,
+                       'replaces_empty_report': bool(retry_empty and today in state['deliveries']),
                        'source_coverage': {slug: item.get('coverage_warnings', []) for slug, _, item in prepared},
                        'ranking_method': settings.get('ranking_method', 'keyword'),
                        'message_id': f'<scout.combined.{scope[:20]}.{today}@literature-scout.local>',
@@ -180,3 +189,17 @@ def topic_sections(configs, prepared, selected):
         heading = short_titles.get(slug, cfg['name'])
         sections.append(heading + '\n' + '─' * len(heading) + '\n\n' + concise_papers(papers))
     return '\n'.join(sections).strip() if sections else 'No new papers today.'
+
+
+
+def confirm_empty_report(folder, day):
+    """Require the original archived selection to prove a zero-paper delivery."""
+    for prefix in ('paperbeacon-daily', 'anomaly-research'):
+        path = folder / 'collected' / day / f'{prefix}-{day}-papers.json'
+        if not path.exists():
+            continue
+        papers = json.loads(path.read_text(encoding='utf-8'))
+        if papers != []:
+            raise ValueError('Today’s report contained papers; --retry-empty cannot resend it')
+        return
+    raise ValueError('Cannot verify an archived zero-paper report; delivery history was not changed')

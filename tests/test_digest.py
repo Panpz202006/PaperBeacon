@@ -101,3 +101,34 @@ class DigestTests(unittest.TestCase):
         from literature_scout.digest import send_saved_digest
         self.assertIn('collect first', send_saved_digest(self.folder, sender=self.send))
         self.send.assert_not_called()
+
+    def test_retry_empty_replaces_only_empty_delivery(self):
+        self.rank.side_effect = lambda *a, **kw: []
+        self.run_job()
+        self.assertEqual(len(self.send.call_args.args[0]['tokens']), 0)
+        self.rank.side_effect = lambda papers, *a, **kw: papers[:5]
+        result = run_digest(ROOT/'config/daily_digest.json', self.folder, now=self.now,
+            sender=self.send, prepare=self.prepare, ranker=self.rank, stage='collect', retry_empty=True)
+        self.assertIn('no email sent', result)
+        self.assertEqual(self.send.call_count, 1)
+        state = json.loads((self.folder/'digest-state.json').read_text())
+        self.assertTrue(state['pending']['replaces_empty_report'])
+        from literature_scout.digest import send_saved_digest
+        send_saved_digest(self.folder, sender=self.send, now=self.now)
+        state = json.loads((self.folder/'digest-state.json').read_text())
+        self.assertEqual(len(state['superseded_empty_deliveries']), 1)
+        self.assertEqual(len(state['reported']), 5)
+        self.assertEqual(self.send.call_count, 2)
+        with self.assertRaises(ValueError):
+            run_digest(ROOT/'config/daily_digest.json', self.folder, now=self.now,
+                sender=self.send, prepare=self.prepare, ranker=self.rank, stage='collect', retry_empty=True)
+
+    def test_retry_empty_does_not_prepare_another_empty_report(self):
+        self.rank.side_effect = lambda *a, **kw: []
+        self.run_job()
+        with self.assertRaisesRegex(RuntimeError, 'No unreported papers'):
+            run_digest(ROOT/'config/daily_digest.json', self.folder, now=self.now,
+                sender=self.send, prepare=self.prepare, ranker=self.rank, stage='collect', retry_empty=True)
+        state = json.loads((self.folder/'digest-state.json').read_text())
+        self.assertNotIn('pending', state)
+        self.send.assert_called_once()

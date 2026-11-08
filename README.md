@@ -202,3 +202,14 @@ paperbeacon-daily-YYYY-MM-DD.txt
 ```
 
 Baseline files and `candidates-START-END` files retain date-window names because they describe retrieved literature rather than delivery frequency. Existing archives and `digest-state.json` are preserved; changing filenames does not reset successful delivery history or resend a report.
+
+## Replace today’s zero-paper report
+
+If a zero-paper email was already sent before historical recommendations became available, prepare a guarded replacement:
+
+```bash
+bash scripts/scout.sh collect --retry-empty
+bash scripts/scout.sh send
+```
+
+This verifies that today's archived report had zero papers, bypasses the per-topic daily guard for collection only, and preserves all sent-paper identities. It refuses to replace a nonempty report and does not prepare another empty email. A successful replacement records the earlier zero-paper delivery in `superseded_empty_deliveries`. Normal daily runs remain protected against duplicate delivery.

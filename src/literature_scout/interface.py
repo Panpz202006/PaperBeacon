@@ -21,6 +21,7 @@ def main(argv=None):
     collect = sub.add_parser('collect', help='Stage 1: collect three-topic papers and save local files; no email')
     collect.add_argument('--config', default='config/daily_digest.json')
     collect.add_argument('--out', default='runs/daily-three-topics')
+    collect.add_argument('--retry-empty', action='store_true', help='Prepare a replacement only if today’s sent report had zero papers')
     send = sub.add_parser('send', help='Stage 2: send the saved digest; no retrieval or GPT')
     send.add_argument('--out', default='runs/daily-three-topics')
     local = sub.add_parser('send-local', help='Email saved CSV/JSON papers without retrieval or GPT')
@@ -44,7 +45,7 @@ def main(argv=None):
         try:
             if args.command == 'collect':
                 from .digest import run_digest
-                print(run_digest(args.config, args.out, stage='collect'))
+                print(run_digest(args.config, args.out, stage='collect', retry_empty=args.retry_empty))
             else:
                 from .digest import send_saved_digest
                 print(send_saved_digest(args.out))
