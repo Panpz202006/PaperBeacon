@@ -21,6 +21,9 @@ def main(argv=None):
     search.add_argument('--until', type=int, help='Last publication year, inclusive (default: current year)')
     search.add_argument('--email-to', help='Email the full exploration report and attachments to this address')
     search.add_argument('--top', type=int, help='Keep only the top N papers by keyword relevance')
+    search.add_argument('--match', choices=['any', 'all'], default='any', help='Require any topic or every topic (default: any)')
+    search.add_argument('--weight', action='append', help='Relative topic weight, e.g. "survival analysis=3"; repeat for each topic (default: 1)')
+    search.add_argument('--from-run', help='Rerank a saved exploration corpus locally; no retrieval or API calls')
     search.add_argument('--venues', nargs='+',
                         help='Comma- or space-separated venues: NeurIPS/NIPS, ICML, ICLR, AAAI, ACM MM, CVPR, IJCAI (default: all seven)')
     search.add_argument('--out', default='runs/area-search')
@@ -61,7 +64,8 @@ def main(argv=None):
             text = args.topic if args.topic is not None else Path(args.abstract_file).read_text(encoding='utf-8')
             result = explore(text, args.out, since=args.since,
                              until=args.until if args.until is not None else datetime.now(ZoneInfo('Asia/Shanghai')).year,
-                             fixture=args.offline_fixture, email_to=args.email_to, venues=args.venues, top=args.top)
+                             fixture=args.offline_fixture, email_to=args.email_to, venues=args.venues, top=args.top,
+                             match=args.match, from_run=args.from_run, weights=args.weight)
             print(f'Saved {len(result.papers)} matching papers: {result.config["report_file"]}')
             for venue, summary in result.counts['venue_coverage'].items():
                 print(f'{venue}: {summary["retrieved_records"]} retrieved; {summary["selected_records"]} selected; '

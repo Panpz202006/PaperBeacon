@@ -220,14 +220,40 @@ Use an inclusive publication-year range to explore the indexed proceedings:
 Add `--venues ICML` to search ICML only, or `--venues ICML NeurIPS ICLR` for a subset. The default remains all seven venues.
 Comma-separated lists also work: `--venues ICML,NeurIPS,ICLR`. Quote lists containing spaces, for example `--venues "ICML, ACM MM, ICLR"`. `NIPS` is accepted as an alias for `NeurIPS`.
 
-Add `--top 100` to retain the top 100 keyword-ranked matches. Ranking uses title/available-abstract keyword overlap, with publication recency contributing to the score. This is lexical screening, not a semantic review. Without `--top`, all matches are retained; `venue-corpus.json` always preserves the full eligible corpus.
+Add `--top 100` to retain the top 100 locally ranked matches. Matching prioritizes the number of requested topics supported by the title or available abstract, then topics supported in the title, then BM25 word relevance (with rare terms weighted more strongly and repeated terms saturated). Recency only breaks relevance ties. Explicit related-term groups currently cover survival analysis/time-to-event, continual/lifelong/incremental learning, parameter-efficient learning (including PEFT, adapter/prompt/prefix tuning, and LoRA), low-rank methods, and anomaly/outlier/novelty detection. LoRA supports both the parameter-efficient and low-rank groups; generic efficiency or low memory alone does not qualify. Generic words such as “analysis” alone cannot qualify a paper for these groups. Other topics use lexical matching with corpus-specific word weights. This is local evidence screening, not a semantic review. Without `--top`, all matches are retained; `venue-corpus.json` always preserves the full eligible corpus.
+
+Use `--match all` to require evidence for every parsed topic; the default `--match any` ranks papers connecting multiple topics first while retaining single-topic papers. Commas, semicolons, and “and” separate topic groups. The parsed topics and each selected paper's supporting expressions and score are saved in `matching.json`; the plain-text report still contains only name, year, and venue. Related terms are a small curated vocabulary, not guaranteed semantic equivalents.
+
+Set relative topic weights with repeated `--weight "topic=number"` flags. Unspecified topics default to `1`; weights must be positive finite numbers. For example, the following emphasizes survival analysis and anomaly detection at `3`, continual learning at `2`, and the other topics at `1`:
+
+```bash
+bash scripts/scout.sh search \
+  --topic "survival analysis, continual learning, parameter efficient learning, low-rank and anomaly detection" \
+  --venues ICML,NIPS,ICLR --since 2023 --until 2026 --top 100 \
+  --weight "survival analysis=3" --weight "continual learning=2" \
+  --weight "parameter efficient learning=1" --weight "low-rank=1" \
+  --weight "anomaly detection=3" \
+  --from-run runs/multi-venue-top100 --out runs/multi-venue-top100-weighted
+```
+
+Weights apply to topic coverage, title support, and word scoring. A highly weighted single-topic paper can outrank a paper covering several lower-weighted topics. Only ratios matter (for example, `3:1` and `30:10` behave identically); multiplying all weights by the same factor does not change the ranking. `--match all` still requires every topic. Unknown or ambiguous weight labels are rejected; use the explicit topic names above rather than `LoRA`, which belongs to both the parameter-efficient and low-rank groups. Weights and weighted evidence are recorded in `manifest.json` and `matching.json`, while the report keeps only name, year, and venue.
+
+Rerank an existing full corpus without any retrieval requests or new dependencies:
+
+```bash
+bash scripts/scout.sh search --topic "survival analysis, continual learning, and anomaly detection" \
+  --venues ICML,NIPS,ICLR --since 2023 --until 2026 --top 100 \
+  --from-run runs/multi-venue-top100 --out runs/multi-venue-top100-refined
+```
+
+Saved coverage failures are preserved, and requested venues/years must fit within the saved run. `--from-run` uses `venue-corpus.json`, not the previous top-100 shortlist. No API or model call is needed for ranking. Missing abstracts still limit recall, and topic matches do not prove that a paper addresses the research question in depth.
 
 ```bash
 bash scripts/scout.sh search --topic "continual anomaly detection" --since 2023 --until 2025 --out runs/anomaly-2023-2025
 bash scripts/scout.sh search --topic "continual anomaly detection" --since 2023 --until 2025 --out runs/anomaly-email --email-to researcher@example.org
 ```
 
-The search enumerates DBLP records for each selected venue and year using pagination, then retains every record with research keyword overlap in its title or available abstract. There is no top-five or top-100 cutoff. `--since` defaults to 2024; `--until` defaults to the current year in Asia/Shanghai. These are publication years, not acceptance dates.
+The search enumerates DBLP records for each selected venue and year using pagination, then applies local topic matching to titles and available abstracts. There is no shortlist cutoff unless `--top` is supplied. `--since` defaults to 2024; `--until` defaults to the current year in Asia/Shanghai. These are publication years, not acceptance dates.
 
 If DBLP fails or returns no records, independent fallbacks cover all seven venues: ICML uses PMLR, NeurIPS its proceedings site, ICLR its official conference paper listing, CVPR the CVF Open Access repository, and IJCAI its proceedings site. AAAI uses Crossref records for its proceedings ISSN; ACM MM uses ACM-deposited Crossref records, filtered by the exact main-proceedings container title to exclude companion and workshop volumes. The Crossref routes exhaust cursor pagination and provide publisher metadata rather than independently verified acceptance lists. HTML fallbacks screen titles; Crossref also uses abstracts when deposited.
 
