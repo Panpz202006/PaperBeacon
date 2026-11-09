@@ -1,5 +1,6 @@
 """Short commands for the repository workflow, with isolated topic histories."""
 import argparse
+import json
 import os
 from pathlib import Path
 import subprocess
@@ -99,10 +100,14 @@ def main(argv=None):
             print(f'ERROR: {exc}', file=sys.stderr)
             return 1
     if args.command == 'digest':
-        from .digest import run_digest
+        from .digest import run_digest, digest_recipient
         try:
+            settings = json.loads(Path(args.config).read_text(encoding='utf-8'))
+            recipient = digest_recipient(settings)
             required = [] if args.preview else [
-                'SCOUT_SMTP_HOST', 'SCOUT_SMTP_USER', 'SCOUT_SMTP_PASSWORD', 'SCOUT_EMAIL_FROM', 'SCOUT_EMAIL_TO']
+                'SCOUT_SMTP_HOST', 'SCOUT_SMTP_USER', 'SCOUT_SMTP_PASSWORD', 'SCOUT_EMAIL_FROM']
+            if not args.preview and not recipient:
+                required.append('SCOUT_EMAIL_TO')
             missing = [key for key in required if not os.getenv(key)]
             if missing:
                 raise ValueError('Missing local credentials: ' + ', '.join(missing) +

@@ -8,6 +8,15 @@ from literature_scout.interface import main
 
 
 class InterfaceTests(unittest.TestCase):
+    @patch.dict('os.environ', {'SCOUT_SMTP_HOST': 'smtp.example.org', 'SCOUT_SMTP_USER': 'sender',
+                              'SCOUT_SMTP_PASSWORD': 'fake', 'SCOUT_EMAIL_FROM': 'sender@example.org',
+                              'SCOUT_CHONG_PENG_EMAIL_TO': 'peng@example.org,guo@example.org'}, clear=True)
+    @patch('literature_scout.digest.run_digest', return_value='Sent')
+    def test_digest_uses_manifest_recipient_without_default_environment_recipient(self, run):
+        self.assertEqual(main(['digest', '--config', 'config/chong_peng/daily_digest.json',
+                               '--out', 'runs/chong-peng-daily']), 0)
+        run.assert_called_once_with('config/chong_peng/daily_digest.json', 'runs/chong-peng-daily', preview=False)
+
     def test_comma_separated_venues_are_filtered_and_normalized(self):
         with tempfile.TemporaryDirectory() as tmp:
             folder = Path(tmp)

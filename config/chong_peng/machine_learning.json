@@ -1,0 +1,42 @@
+{
+  "name": "Machine Learning",
+  "topic": "Machine Learning",
+  "venues": [
+    "NeurIPS",
+    "ICML",
+    "ICLR",
+    "AAAI",
+    "ACM MM",
+    "CVPR",
+    "IJCAI",
+    "ICCV",
+    "ECCV",
+    "TPAMI",
+    "TNNLS",
+    "JMLR"
+  ],
+  "include_arxiv": true,
+  "queries": [
+    "machine learning",
+    "representation learning",
+    "learning theory generalization"
+  ],
+  "max_queries": 3,
+  "per_source_per_query": 20,
+  "max_papers": 60,
+  "timezone": "Asia/Shanghai",
+  "send_time": "08:00",
+  "ranking_method": "keyword",
+  "ranking_keywords": [
+    "machine learning",
+    "representation learning",
+    "statistical learning",
+    "generalization",
+    "optimization"
+  ],
+  "venue_aliases": {
+    "JMLR": [
+      "Journal of Machine Learning Research"
+    ]
+  }
+}

@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 from zoneinfo import ZoneInfo
 
 from literature_scout.daily import save_json
@@ -15,6 +15,43 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class DigestTests(unittest.TestCase):
+    @patch.dict('os.environ', {'SCOUT_CHONG_PENG_EMAIL_TO': 'peng@example.org,guo@example.org'})
+    def test_professor_digest_keeps_its_recipient_in_saved_outbox(self):
+        from literature_scout.digest import send_saved_digest
+        manifest = ROOT/'config/chong_peng/daily_digest.json'
+        result = run_digest(manifest, self.folder, now=self.now, sender=self.send,
+                            prepare=self.prepare, ranker=self.rank, stage='collect')
+        self.assertIn('no email sent', result)
+        self.send.assert_not_called()
+        pending = json.loads((self.folder/'digest-state.json').read_text())['pending']
+        self.assertEqual(pending['to'], 'peng@example.org,guo@example.org')
+        self.assertEqual(pending['subject'],
+                         'PaperBeacon Daily | ML, Subspace Clustering & Multi-view Learning | 2026-11-05 | 5 papers')
+        self.assertNotIn('Anomaly Detection Research', pending['subject'])
+        self.assertEqual(set(pending['children']), {'machine_learning', 'subspace_clustering', 'multi_view_learning'})
+        send_saved_digest(self.folder, sender=self.send, now=self.now)
+        self.assertEqual(self.send.call_args.args[0]['to'], 'peng@example.org,guo@example.org')
+        self.assertEqual(run_digest(manifest, self.folder, now=self.now, sender=self.send,
+                                   prepare=self.prepare, ranker=self.rank), 'Already sent today')
+        self.send.assert_called_once()
+
+    @patch.dict('os.environ', {'SCOUT_CHONG_PENG_EMAIL_TO': 'peng@example.org,guo@example.org'})
+    def test_professor_digest_waits_until_eight_shanghai_time(self):
+        now = self.now.replace(hour=7, minute=59)
+        result = run_digest(ROOT/'config/chong_peng/daily_digest.json', self.folder,
+                            now=now, sender=self.send, prepare=self.prepare, ranker=self.rank)
+        self.assertEqual(result, 'Waiting until 08:00')
+        self.prepare.assert_not_called()
+        self.send.assert_not_called()
+
+    @patch.dict('os.environ', {'SCOUT_EMAIL_TO': 'unrelated@example.org'}, clear=True)
+    def test_private_recipient_missing_does_not_use_another_reports_address(self):
+        with self.assertRaisesRegex(ValueError, 'Missing private recipient setting'):
+            run_digest(ROOT/'config/chong_peng/daily_digest.json', self.folder, now=self.now,
+                       sender=self.send, prepare=self.prepare, ranker=self.rank)
+        self.send.assert_not_called()
+        self.prepare.assert_not_called()
+
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)

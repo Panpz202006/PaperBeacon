@@ -1,0 +1,43 @@
+{
+  "name": "Subspace Clustering",
+  "topic": "Subspace Clustering",
+  "venues": [
+    "NeurIPS",
+    "ICML",
+    "ICLR",
+    "AAAI",
+    "ACM MM",
+    "CVPR",
+    "IJCAI",
+    "ICCV",
+    "ECCV",
+    "TPAMI",
+    "TNNLS",
+    "JMLR"
+  ],
+  "include_arxiv": true,
+  "queries": [
+    "subspace clustering",
+    "deep subspace clustering",
+    "multi view subspace clustering"
+  ],
+  "max_queries": 3,
+  "per_source_per_query": 20,
+  "max_papers": 60,
+  "timezone": "Asia/Shanghai",
+  "send_time": "08:00",
+  "ranking_method": "keyword",
+  "ranking_keywords": [
+    "subspace clustering",
+    "subspace",
+    "self expressive",
+    "spectral clustering",
+    "low rank",
+    "sparse representation"
+  ],
+  "venue_aliases": {
+    "JMLR": [
+      "Journal of Machine Learning Research"
+    ]
+  }
+}

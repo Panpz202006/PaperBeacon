@@ -1,0 +1,16 @@
+{
+  "name": "PaperBeacon Daily | ML, Subspace Clustering & Multi-view Learning",
+  "recipient_env": "SCOUT_CHONG_PENG_EMAIL_TO",
+  "timezone": "Asia/Shanghai",
+  "send_time": "08:00",
+  "llm_model": "gpt-6-astra",
+  "topics": [
+    "machine_learning.json",
+    "subspace_clustering.json",
+    "multi_view_learning.json"
+  ],
+  "retrieval_policy": "available",
+  "openalex_anonymous_fallback": true,
+  "ranking_method": "keyword",
+  "historical_fallback": true
+}

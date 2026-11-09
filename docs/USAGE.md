@@ -111,7 +111,33 @@ Create `runs/` and add the following with `crontab -e`, using your actual reposi
 @reboot /bin/bash /path/to/PaperBeacon/scripts/daily_watch.sh >> /path/to/PaperBeacon/runs/daily.log 2>&1
 ```
 
-The application sends only when due and unsent, rather than on every check. Use one scheduler per laptop.
+The application sends only when due and unsent, rather than on every check. Use one scheduler per report/output directory.
+
+## Shared daily report: Professors Chong Peng and Zhaoru Guo
+
+Professors Chong Peng and Zhaoru Guo receive the same report at **08:00 Asia/Shanghai**, covering **Machine Learning; Subspace Clustering; Multi-view Learning**. Both recipients share the existing cron job and delivery history. The configuration is `config/chong_peng/daily_digest.json`, with one topic file per area. It uses the existing SMTP sender, local keyword ranking, up to five unreported papers, and labeled historical recommendations on quiet days.
+
+Recipient addresses stay in `.env.chong_peng`, an ignored local file with mode `600`. On a new installation, copy `.env.chong_peng.example` to `.env.chong_peng` and set `SCOUT_CHONG_PENG_EMAIL_TO` privately to a comma-separated list of addresses. The tracked manifest stores only the environment-variable name (`recipient_env`), and tests use reserved example addresses. The cron wrapper loads this file automatically; missing private recipients stop delivery rather than falling back to another report's recipient. Do not force-add private environment files, generated reports, or backups to Git.
+
+This privacy policy applies to all future recipients and profiles; see `AGENTS.md` and `.cursor/rules/recipient-privacy.mdc`. Run `python3 scripts/check_recipient_privacy.py --staged` before commits. Enable the tracked pre-commit guard on each checkout with `git config --local core.hooksPath .githooks` after checking for existing custom hooks. It checks staged plaintext email addresses and the effective author/committer identities, including environment overrides, and reports locations without echoing addresses. Use your verified GitHub noreply email for commit identity. Ignored private files remain local; these checks do not erase old published metadata or detect every encoded address.
+
+The shared report's subject is `PaperBeacon Daily | ML, Subspace Clustering & Multi-view Learning | {date} | {count} papers`, with the date and selected-paper count filled in automatically.
+
+```bash
+# Generate the separate cron entry without activating it.
+.venv/bin/python scripts/install_chong_peng_cron.py
+
+# Install or update only the managed Professor Peng cron block.
+.venv/bin/python scripts/install_chong_peng_cron.py --install
+
+# Inspect the installed entry and this report's logs.
+crontab -l
+tail -n 30 runs/chong-peng-daily.log runs/chong-peng-daily-error.log
+```
+
+Cron invokes `scripts/chong_peng_daily.sh` every five minutes; the application waits until 08:00 and sends once per day, retrying after interruptions. This makes delivery time independent of the cron daemon's time zone. The laptop must be awake and online. This job is separate from the original 07:30 LaunchAgent and uses its own `runs/chong-peng-daily/` state, archives, and provider cache. Resolved recipients are saved with each prepared email under the ignored `runs/` directory, so `.env`'s default recipient does not redirect this report.
+
+The installer preserves unrelated cron entries and backs up the previous crontab under `runs/scheduler-backups/`. To stop only this report, use `crontab -e` and remove the block between `BEGIN PaperBeacon chong-peng daily report` and `END PaperBeacon chong-peng daily report`. Keep its output directory if you may resume delivery later.
 
 ## Local files and recovery
 

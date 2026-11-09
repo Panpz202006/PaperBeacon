@@ -1,0 +1,19 @@
+---
+description: Keep recipient and sender email addresses out of public project content and future commits
+alwaysApply: true
+---
+
+# Recipient privacy
+
+- Apply this policy to every existing or newly added recipient/profile.
+- Store real recipient/sender addresses only in ignored local `.env` or `.env.<profile>` files with owner-only permissions (`600`).
+- Tracked profile manifests must use `recipient_env` with a profile-specific variable; never embed real addresses.
+- Load private settings explicitly in that profile's scheduled wrapper. Missing private recipients must stop delivery rather than use another profile's address.
+- Templates, docs, tests, fixtures, commit messages, and PR text must use reserved placeholders such as `recipient@example.org`.
+- Do not print real addresses or credentials during audits; report file locations and categories instead.
+- Never force-add private environment files, generated reports, delivery state, or private backup bundles.
+- Before committing, run `python3 scripts/check_recipient_privacy.py --staged`. Keep the repository's pre-commit privacy hook enabled.
+- Use the repository's public GitHub noreply identity for new commits; inspect author and committer overrides too.
+- Before publishing, audit reachable history as well as current files. A cleanup commit does not erase older exposures.
+- Do not rewrite published history or force-push without explicit user approval. Back up before replacing an unpublished commit.
+- Preserve active schedules, topic scope, private recipient values, and delivery history when changing storage.

@@ -3,6 +3,7 @@ from datetime import datetime, time
 from email.utils import format_datetime
 import hashlib
 import json
+import os
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -13,6 +14,17 @@ from .ranking import daily_ranker, ranking_text
 from .models import Paper
 from .monitor import identity_tokens
 from .history import historical_shortlists
+
+
+def digest_recipient(settings):
+    """Resolve a private recipient override; fail closed instead of using another report's address."""
+    key = settings.get('recipient_env')
+    if key:
+        value = os.getenv(key, '').strip()
+        if not value:
+            raise ValueError(f'Missing private recipient setting: {key}')
+        return value
+    return settings.get('recipient')
 
 
 def finalize(folder, state, path):
@@ -43,6 +55,7 @@ def run_digest(manifest, folder, *, preview=False, now=None, prepare=run_daily,
         raise ValueError('stage must be both or collect')
     manifest = Path(manifest).resolve()
     settings = json.loads(manifest.read_text(encoding='utf-8'))
+    recipient = digest_recipient(settings)
     now = (now or datetime.now().astimezone()).astimezone(ZoneInfo(settings['timezone']))
     today = str(now.date())
     ranker = ranker or daily_ranker(settings)
@@ -104,7 +117,8 @@ def run_digest(manifest, folder, *, preview=False, now=None, prepare=run_daily,
                 raise RuntimeError('No current evidence or unreported historical recommendations available. ' + '; '.join(unavailable + history_issues))
             if retry_empty and not selected:
                 raise RuntimeError('No unreported papers available; no replacement email prepared')
-            subject = f'Anomaly Detection Research | Survival, GANs & Agentic AI | {today} | {len(selected)} papers'
+            label = settings.get('name', 'Anomaly Detection Research | Survival, GANs & Agentic AI')
+            subject = f'{label} | {today} | {len(selected)} papers'
             lines = (["Historical picks — previously unreported papers from your saved library.", '']
                      if selection_mode == 'historical' else [])
             lines.append(topic_sections(configs, prepared, selected))
@@ -118,6 +132,8 @@ def run_digest(manifest, folder, *, preview=False, now=None, prepare=run_daily,
                        'ranking_method': settings.get('ranking_method', 'keyword'),
                        'message_id': f'<scout.combined.{scope[:20]}.{today}@literature-scout.local>',
                        'date_header': format_datetime(now)}
+            if recipient:
+                pending['to'] = recipient
             if preview:
                 (folder / 'preview.txt').write_text(pending['body'], encoding='utf-8')
                 return f'Combined preview saved: {folder / "preview.txt"}; no email sent'

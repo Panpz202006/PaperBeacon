@@ -2,6 +2,7 @@
 .env
 .env.*
 !.env.example
+!.env.chong_peng.example
 *.pem
 *.key
 

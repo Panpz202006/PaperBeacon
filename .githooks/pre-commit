@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+if [[ -x .venv/bin/python ]]; then
+  exec .venv/bin/python scripts/check_recipient_privacy.py --staged
+fi
+exec python3 scripts/check_recipient_privacy.py --staged

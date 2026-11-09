@@ -1,0 +1,43 @@
+{
+  "name": "Multi-view Learning",
+  "topic": "Multi-view Learning",
+  "venues": [
+    "NeurIPS",
+    "ICML",
+    "ICLR",
+    "AAAI",
+    "ACM MM",
+    "CVPR",
+    "IJCAI",
+    "ICCV",
+    "ECCV",
+    "TPAMI",
+    "TNNLS",
+    "JMLR"
+  ],
+  "include_arxiv": true,
+  "queries": [
+    "multi view learning",
+    "multi view clustering",
+    "incomplete multi view learning"
+  ],
+  "max_queries": 3,
+  "per_source_per_query": 20,
+  "max_papers": 60,
+  "timezone": "Asia/Shanghai",
+  "send_time": "08:00",
+  "ranking_method": "keyword",
+  "ranking_keywords": [
+    "multi-view learning",
+    "multiview",
+    "multi view",
+    "cross view",
+    "view fusion",
+    "incomplete views"
+  ],
+  "venue_aliases": {
+    "JMLR": [
+      "Journal of Machine Learning Research"
+    ]
+  }
+}
